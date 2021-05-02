@@ -125,10 +125,11 @@ export function setup(bars) {
       xp.classList.remove('active', 'pulse');
     } else {
       const nextPoly = jobDetail.nextPolyglotMilliseconds;
+      const maxPoly = (bars.level === 80 ? 2 : 1);
       xenoTimer.innerText = Math.ceil(nextPoly / 1000.0);
       xp.classList.add('active');
 
-      if (fouls === 2 && nextPoly < 5000)
+      if (fouls === maxPoly && nextPoly < 5000)
         xp.classList.add('pulse');
       else
         xp.classList.remove('pulse');
