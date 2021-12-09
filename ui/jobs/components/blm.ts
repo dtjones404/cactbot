@@ -23,25 +23,6 @@ export class BLMComponent extends BaseComponent {
 
     this.umbralStacks = 0;
 
-    this.thunderDot = this.bars.addProcBox({
-      id: "blm-dot-thunder",
-      fgColor: "blm-color-dot",
-      threshold: 4,
-      notifyWhenExpired: true,
-    });
-    this.thunderProc = this.bars.addProcBox({
-      id: "blm-procs-thunder",
-      fgColor: "blm-color-thunder",
-      threshold: 1000,
-    });
-    this.thunderProc.bigatzero = false;
-    this.fireProc = this.bars.addProcBox({
-      id: "blm-procs-fire",
-      fgColor: "blm-color-fire",
-      threshold: 1000,
-    });
-    this.fireProc.bigatzero = false;
-
     // It'd be super nice to use grid here.
     // Maybe some day when cactbot uses new cef.
     const stacksContainer = document.createElement("div");
@@ -76,52 +57,6 @@ export class BLMComponent extends BaseComponent {
     });
   }
 
-  override onUseAbility(id: string): void {
-    switch (id) {
-      case kAbility.Thunder1:
-      case kAbility.Thunder4:
-        this.thunderDot.duration = 18;
-        break;
-      case kAbility.Thunder2:
-        this.thunderDot.duration = 12;
-        break;
-      case kAbility.Thunder3:
-        this.thunderDot.duration = 24;
-        break;
-    }
-  }
-
-  override onYouGainEffect(
-    id: string,
-    matches: PartialFieldMatches<"GainsEffect">
-  ): void {
-    switch (id) {
-      case EffectId.Thundercloud:
-        this.thunderProc.duration = parseFloat(matches.duration ?? "0");
-        break;
-      case EffectId.Firestarter:
-        this.fireProc.duration = parseFloat(matches.duration ?? "0");
-        break;
-      case EffectId.CircleOfPower:
-        this.player.speedBuffs.circleOfPower = true;
-        break;
-    }
-  }
-
-  override onYouLoseEffect(id: string): void {
-    switch (id) {
-      case EffectId.Thundercloud:
-        this.thunderProc.duration = 0;
-        break;
-      case EffectId.Firestarter:
-        this.fireProc.duration = 0;
-        break;
-      case EffectId.CircleOfPower:
-        this.player.speedBuffs.circleOfPower = false;
-        break;
-    }
-  }
-
   override onJobDetailUpdate(jobDetail: JobDetail["BLM"]): void {
     // FIXME: make it able to use after refactoring
     if (this.umbralStacks !== jobDetail.umbralStacks) {
@@ -145,8 +80,11 @@ export class BLMComponent extends BaseComponent {
     }
 
     const stacks = jobDetail.umbralStacks;
-    const seconds = Math.ceil(jobDetail.umbralMilliseconds / 1000.0).toString();
+    const seconds = (jobDetail.umbralMilliseconds / 1000.0).toPrecision(2);
     const p = this.umbralTimer.parentNode;
+    if (stacks && +seconds < 5) {
+      p.classList.add("pulse");
+    }
     if (!stacks) {
       this.umbralTimer.innerText = "";
       p.classList.remove("fire");
