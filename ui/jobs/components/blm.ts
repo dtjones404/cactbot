@@ -1,11 +1,11 @@
-import EffectId from '../../../resources/effect_id';
-import TimerBox from '../../../resources/timerbox';
-import { JobDetail } from '../../../types/event';
-import { ResourceBox } from '../bars';
-import { kAbility } from '../constants';
-import { PartialFieldMatches } from '../event_emitter';
+import EffectId from "../../../resources/effect_id";
+import TimerBox from "../../../resources/timerbox";
+import { JobDetail } from "../../../types/event";
+import { ResourceBox } from "../bars";
+import { kAbility } from "../constants";
+import { PartialFieldMatches } from "../event_emitter";
 
-import { BaseComponent, ComponentInterface } from './base';
+import { BaseComponent, ComponentInterface } from "./base";
 
 export class BLMComponent extends BaseComponent {
   thunderDot: TimerBox;
@@ -24,55 +24,55 @@ export class BLMComponent extends BaseComponent {
     this.umbralStacks = 0;
 
     this.thunderDot = this.bars.addProcBox({
-      id: 'blm-dot-thunder',
-      fgColor: 'blm-color-dot',
+      id: "blm-dot-thunder",
+      fgColor: "blm-color-dot",
       threshold: 4,
       notifyWhenExpired: true,
     });
     this.thunderProc = this.bars.addProcBox({
-      id: 'blm-procs-thunder',
-      fgColor: 'blm-color-thunder',
+      id: "blm-procs-thunder",
+      fgColor: "blm-color-thunder",
       threshold: 1000,
     });
     this.thunderProc.bigatzero = false;
     this.fireProc = this.bars.addProcBox({
-      id: 'blm-procs-fire',
-      fgColor: 'blm-color-fire',
+      id: "blm-procs-fire",
+      fgColor: "blm-color-fire",
       threshold: 1000,
     });
     this.fireProc.bigatzero = false;
 
     // It'd be super nice to use grid here.
     // Maybe some day when cactbot uses new cef.
-    const stacksContainer = document.createElement('div');
-    stacksContainer.id = 'blm-stacks';
+    const stacksContainer = document.createElement("div");
+    stacksContainer.id = "blm-stacks";
     this.bars.addJobBarContainer().appendChild(stacksContainer);
 
-    const heartStacksContainer = document.createElement('div');
-    heartStacksContainer.id = 'blm-stacks-heart';
+    const heartStacksContainer = document.createElement("div");
+    heartStacksContainer.id = "blm-stacks-heart";
     stacksContainer.appendChild(heartStacksContainer);
     this.heartStacks = [];
     for (let i = 0; i < 3; ++i) {
-      const d = document.createElement('div');
+      const d = document.createElement("div");
       heartStacksContainer.appendChild(d);
       this.heartStacks.push(d);
     }
 
-    const xenoStacksContainer = document.createElement('div');
-    xenoStacksContainer.id = 'blm-stacks-xeno';
+    const xenoStacksContainer = document.createElement("div");
+    xenoStacksContainer.id = "blm-stacks-xeno";
     stacksContainer.appendChild(xenoStacksContainer);
     this.xenoStacks = [];
     for (let i = 0; i < 2; ++i) {
-      const d = document.createElement('div');
+      const d = document.createElement("div");
       xenoStacksContainer.appendChild(d);
       this.xenoStacks.push(d);
     }
 
     this.umbralTimer = this.bars.addResourceBox({
-      classList: ['blm-umbral-timer'],
+      classList: ["blm-umbral-timer"],
     });
     this.xenoTimer = this.bars.addResourceBox({
-      classList: ['blm-xeno-timer'],
+      classList: ["blm-xeno-timer"],
     });
   }
 
@@ -91,13 +91,16 @@ export class BLMComponent extends BaseComponent {
     }
   }
 
-  override onYouGainEffect(id: string, matches: PartialFieldMatches<'GainsEffect'>): void {
+  override onYouGainEffect(
+    id: string,
+    matches: PartialFieldMatches<"GainsEffect">
+  ): void {
     switch (id) {
       case EffectId.Thundercloud:
-        this.thunderProc.duration = parseFloat(matches.duration ?? '0');
+        this.thunderProc.duration = parseFloat(matches.duration ?? "0");
         break;
       case EffectId.Firestarter:
-        this.fireProc.duration = parseFloat(matches.duration ?? '0');
+        this.fireProc.duration = parseFloat(matches.duration ?? "0");
         break;
       case EffectId.CircleOfPower:
         this.player.speedBuffs.circleOfPower = true;
@@ -119,7 +122,7 @@ export class BLMComponent extends BaseComponent {
     }
   }
 
-  override onJobDetailUpdate(jobDetail: JobDetail['BLM']): void {
+  override onJobDetailUpdate(jobDetail: JobDetail["BLM"]): void {
     // FIXME: make it able to use after refactoring
     if (this.umbralStacks !== jobDetail.umbralStacks) {
       this.umbralStacks = jobDetail.umbralStacks;
@@ -132,49 +135,44 @@ export class BLMComponent extends BaseComponent {
     }
     const fouls = jobDetail.foulCount;
     for (let i = 0; i < 2; ++i) {
-      if (fouls > i)
-        this.xenoStacks[i]?.classList.add('active');
-      else
-        this.xenoStacks[i]?.classList.remove('active');
+      if (fouls > i) this.xenoStacks[i]?.classList.add("active");
+      else this.xenoStacks[i]?.classList.remove("active");
     }
     const hearts = jobDetail.umbralHearts;
     for (let i = 0; i < 3; ++i) {
-      if (hearts > i)
-        this.heartStacks[i]?.classList.add('active');
-      else
-        this.heartStacks[i]?.classList.remove('active');
+      if (hearts > i) this.heartStacks[i]?.classList.add("active");
+      else this.heartStacks[i]?.classList.remove("active");
     }
 
     const stacks = jobDetail.umbralStacks;
     const seconds = Math.ceil(jobDetail.umbralMilliseconds / 1000.0).toString();
     const p = this.umbralTimer.parentNode;
     if (!stacks) {
-      this.umbralTimer.innerText = '';
-      p.classList.remove('fire');
-      p.classList.remove('ice');
+      this.umbralTimer.innerText = "";
+      p.classList.remove("fire");
+      p.classList.remove("ice");
     } else if (stacks > 0) {
       this.umbralTimer.innerText = seconds;
-      p.classList.add('fire');
-      p.classList.remove('ice');
+      p.classList.add("fire");
+      p.classList.remove("ice");
     } else {
       this.umbralTimer.innerText = seconds;
-      p.classList.remove('fire');
-      p.classList.add('ice');
+      p.classList.remove("fire");
+      p.classList.add("ice");
     }
 
     const xp = this.xenoTimer.parentNode;
     if (!jobDetail.enochian) {
-      this.xenoTimer.innerText = '';
-      xp.classList.remove('active', 'pulse');
+      this.xenoTimer.innerText = "";
+      xp.classList.remove("active", "pulse");
     } else {
       const nextPoly = jobDetail.nextPolyglotMilliseconds;
+      const maxPoly = this.bars.player.level === 80 ? 2 : 1;
       this.xenoTimer.innerText = Math.ceil(nextPoly / 1000.0).toString();
-      xp.classList.add('active');
+      xp.classList.add("active");
 
-      if (fouls === 2 && nextPoly < 5000)
-        xp.classList.add('pulse');
-      else
-        xp.classList.remove('pulse');
+      if (fouls === maxPoly && nextPoly < 5000) xp.classList.add("pulse");
+      else xp.classList.remove("pulse");
     }
   }
 
